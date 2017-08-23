@@ -6,6 +6,9 @@ class TypeInfo(models.Model):
     ttitle = models.CharField(max_length=20)
     isDelete = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.ttitle.encode(encoding='utf-8')
+
 class GoodsInfo(models.Model):
     gtitle = models.CharField(max_length=20)
     gpic = models.ImageField(upload_to='df_goods')
@@ -18,3 +21,6 @@ class GoodsInfo(models.Model):
     gcontent = HTMLField()
     gtype = models.ForeignKey('TypeInfo')
     #gadv = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.gtitle.encode(encoding='utf-8')
