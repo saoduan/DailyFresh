@@ -7,6 +7,11 @@
 	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
 </head>
 <body>
+<script>
+
+document.getElementById("one").innerHTML="hello";
+
+</script>
 	<div class="login_top clearfix">
 		<a href="index.html" class="login_logo"><img src="/static/images/logo02.png"></a>
 	</div>
@@ -23,10 +28,10 @@
 				<div class="form_input">
 					<form action="/user/user_info_handle", method="post">
                         {% csrf_token %}
-						<input type="text" name="username" value={{ user }} class="name_input" placeholder="请输入用户名">
-						<div class="user_error">输入错误</div>
-						<input type="password" name="pwd" class="pass_input" placeholder="请输入密码">
-						<div class="pwd_error">输入错误</div>
+						<input type="text" name="username" class="name_input" value="{{ user }}" placeholder="请输入用户名">
+						<div id="user_error">输入错误</div>
+						<input type="password" name="pwd" class="pass_input"  value="{{ pwd }}" placeholder="请输入密码">
+						<div id="pwd_error">输入错误</div>
 						<div class="more_input clearfix">
 							<input type="checkbox" name="isRemeberUser", value="checkbox" checked="checked">
 							<label>记住用户名</label>

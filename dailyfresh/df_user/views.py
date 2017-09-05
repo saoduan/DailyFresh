@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, render_to_response
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from hashlib import sha1
 from .models import *
 
 def register(request):
     return render(request, 'df_user/register.html')
+
 
 def register_handle(request):
     post = request.POST
@@ -31,42 +32,67 @@ def register_handle(request):
 
     return redirect('/user/login')
 
+
 def register_exist(request):
     uname = request.GET.get('uname')
     count = UserInfo.objects.filter(uname = uname).count()
 #    return HttpResponse(count)
     return JsonResponse({'count':count})
 
+
 def login(request):
-    user_name = request.COOKIES.get('user')
-    content = {'user': user_name}
+    user_name = request.COOKIES.get('user', '')
+
+    content = {'user': user_name, 'error_name': 0, 'error_pwd': 0}
     return render(request, 'df_user/login.html', content)
+
 
 def user_info_handle(request):
     post = request.POST
     input_uname = post.get("username")
     input_pwd = post.get("pwd")
+    is_remember = post.get("isRemeberUser", 0)
 
-    s1 = sha1()
-    s1.update(input_pwd.encode('utf-8'))
-    upwd1 = s1.hexdigest()
-
-    db_objects = UserInfo.objects.filter(uname=input_uname, upwd=upwd1)
+    db_objects = UserInfo.objects.filter(uname=input_uname)
 
 #        response = rende_to_response("df_user/user_center_info.html")
 #        response.set_cookie('user', 'input_uname')
 #        return response
-    if len(db_objects) == 0:
-        return redirect('/user/login')
-#TODO:js
-    response = redirect("/user/info/")
-    request.session['user_id'] = db_objects[0].id
-    request.session['user_name'] = db_objects[0].uname
+    if len(db_objects) == 1:
+        s1 = sha1()
+        s1.update(input_pwd.encode('utf-8'))
+        upwd1 = s1.hexdigest()
 
-    if post.get("isRemeberUser") == 'checkbox':
-        response.set_cookie('user', input_uname)
+        if db_objects[0].upwd == upwd1:
+            response = HttpResponseRedirect('/user/info/')
 
-    return response
+            if is_remember == 'checkbox':
+                response.set_cookie('user', input_uname)
+            else:
+                response.set_cookie('user', '', max_age=-1)
+
+            request.session['user_id'] = db_objects[0].id
+            request.session['user_name'] = db_objects[0].uname
+
+            return response
+
+        else:
+            context = {'user':input_uname, 'error_name':0, 'error_pwd':1, 'pwd':input_pwd}
+            return render(request, 'df_user/login.html', context)
+    else:
+        context = {'user': input_uname, 'error_name':1, 'error_pwd': 0, 'pwd':input_pwd}
+        return render(request, 'df_user/login.html', context)
+
+#    response = redirect("/user/info/")
+#    request.session['user_id'] = db_objects[0].id
+#    request.session['user_name'] = db_objects[0].uname
+
+#    if is_remember == 'checkbox':
+#        response.set_cookie('user', input_uname)
+#    else:
+#        response.set_cookie('user', "", max_age=-1)
+ #   return response
+
 
 def user_center_info(request):
     user_name = request.session.get('user_name')
@@ -81,8 +107,10 @@ def user_center_info(request):
 
     return render(request, 'df_user/user_center_info.html', content)
 
+
 def user_order(request):
     return render(request, 'df_user/user_center_order.html')
+
 
 def user_site(request):
     user = UserInfo.objects.get(id=request.session.get('user_id'))
