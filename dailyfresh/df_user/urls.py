@@ -11,4 +11,5 @@ urlpatterns = [
 
     url(r'^order/$', views.user_order),
     url(r'^site/$', views.user_site),
+    url(r'^verifycode/$', views.verifycode),
 ]

@@ -51,7 +51,7 @@ $(function(){
 			$.get('/user/register_exist/?uname='+$('#user_name').val(),function (data){
 				if(data.count >= 1){
 					$('#user_name').next().html('用户名已经存在')
-					$('#user_name').next.show();
+					$('#user_name').next().show();
 					error_name = true;
 				}else{
 					$('#user_name').next().hide();
@@ -117,12 +117,11 @@ $(function(){
 	}
 
 
-	$('#reg_form').submit(function() {
+	$('form').submit(function() {
 		check_user_name();
 		check_pwd();
 		check_cpwd();
 		check_email();
-
 		if(error_name == false && error_password == false && error_check_password == false && error_email == false && error_check == false)
 		{
 			return true;

@@ -14,7 +14,8 @@ def register_handle(request):
     upwd1 = post.get("pwd")
     upwd2 = post.get("cpwd")
     uemail = post.get("email")
-
+    if uname == None:
+        return redirect
 # check whether the password entered for the twice time is consistent
     if upwd1 != upwd2:
         return redirect('/user/register')
@@ -46,6 +47,47 @@ def login(request):
     content = {'user': user_name, 'error_name': 0, 'error_pwd': 0}
     return render(request, 'df_user/login.html', content)
 
+def verifycode(request):
+    from PIL import Image, ImageDraw, ImageFont
+    import random
+    bgcolor = (random.randrange(20, 100), random.randrange(
+        20, 100), 255)
+    width = 100
+    height = 35
+
+    im = Image.new('RGB', (width, height), bgcolor)
+
+    draw = ImageDraw.Draw(im)
+
+    for i in range(0, 100):
+        xy = (random.randrange(0, width), random.randrange(0, height))
+        fill = (random.randrange(0, 255), 255, random.randrange(0, 255))
+        draw.point(xy, fill=fill)
+
+    str1 = 'ABCD123EFGHIJK456LMNOPQRS789TUVWXYZ0'
+    rand_str = ''
+    for i in range(0, 4):
+        rand_str += str1[random.randrange(0, len(str1))]
+
+#    font = ImageFont.truetype('FreeMono.ttf', 23)
+    font = ImageFont.truetype('arial.ttf', 23)
+    fontcolor = (255, random.randrange(0, 255), random.randrange(0, 255))
+
+    draw.text((5, 2), rand_str[0], font=font, fill=fontcolor)
+    draw.text((25, 2), rand_str[1], font=font, fill=fontcolor)
+    draw.text((50, 2), rand_str[2], font=font, fill=fontcolor)
+    draw.text((75, 2), rand_str[3], font=font, fill=fontcolor)
+
+    del draw
+
+    request.session['verifycode'] = rand_str
+
+    import io
+#    buf = io.StringIO()
+    buf = io.BytesIO()
+
+    im.save(buf, 'png')
+    return HttpResponse(buf.getvalue(), 'image/png')
 
 def user_info_handle(request):
     post = request.POST
