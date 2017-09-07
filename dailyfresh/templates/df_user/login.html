@@ -5,50 +5,11 @@
 	<title>天天生鲜-登录</title>
 	<link rel="stylesheet" type="text/css" href="/static/css/reset.css">
 	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/static/js/login.js"></script>
 </head>
 <body>
-<script>
-            name_error = false;
-            pwd_error = false;
 
-            if({{ error_name }} == 1){
-                $('.user_error').html("user error").show();
-                name_error = true
-            }
-            if({{ error_pwd }} == 1){
-                $('.pwd_error').html("pwd error").show();
-                pwd_error = true;
-            }
-
-            $('.name_input').blur(function () {
-                if ($('.name_input').var().length()==0){
-                    $('.user_error').html('please input name').show();
-                    name_error = true;
-                }else{
-                    $('.user_error').hide();
-                    name_error = false;
-                }
-            });
-
-            $('.pass_input').blur(function () {
-                if($('.pass_input').var().length()==0){
-                    $('.pwd_error').html('please input pwd').show();
-                    pwd_error = true;
-                }else{
-                    $('.pwd_error').hide();
-                    pwd_error = false;
-                }
-            });
-
-            $('form').submit(function () {
-                if(pwd_error == false && name_error == false){
-                    return true;
-                }
-                else{
-                    return false;
-                }
-            });
-</script>
 	<div class="login_top clearfix">
 		<a href="index.html" class="login_logo"><img src="/static/images/logo02.png"></a>
 	</div>
@@ -63,11 +24,11 @@
 					<a href="/user/register">立即注册</a>
 				</div>
 				<div class="form_input">
-					<form action="/user/verifycode" method="post">
+					<form action="/user/user_info_handle" method="post">
                         {% csrf_token %}
-						<input type="text" name="username" class="name_input" value="{{ user }}" placeholder="请输入用户名">
+						<input type="text" name="username" id="name_input" value="" placeholder="请输入用户名">
 						<div id="user_error">输入错误</div>
-						<input type="password" name="pwd" class="pass_input"  value="{{ pwd }}" placeholder="请输入密码">
+						<input type="password" name="pwd" id="pass_input"  value="" placeholder="请输入密码">
 						<div id="pwd_error">输入错误</div>
 						<div class="more_input clearfix">
 							<input type="checkbox" name="isRemeberUser", value="checkbox" checked="checked">
@@ -75,12 +36,18 @@
 							<a href="#">忘记密码</a>
 						</div>
                         <div>
-                        <img id='verifycode' src="/user/verifycode/" alt="CheckCode"/>
-                        <a  id='verifycodeChange' href="/user/login/">看不清，换一个</a>
+                            <span><img id='verifycode' src="/user/verifycode/" onclick="refresh_check_code(this)"></span>
+                        <span  id='verifycodeChange'>点击图片刷新</span>
                             <br>
-                            <input type="text" name="vc" class="verify">
+                            <input type="text" name="vc" id="verify">
+                            <div id="vc_error">输入错误</div>
                             <input type="submit" name="" value="登录" class="input_submit">
                         </div>
+                        <script>
+                            function refresh_check_code(ths) {
+                                 ths.src += '?';
+                            }
+                        </script>
 					</form>
 				</div>
 			</div>

@@ -94,9 +94,13 @@ def user_info_handle(request):
     input_uname = post.get("username")
     input_pwd = post.get("pwd")
     is_remember = post.get("isRemeberUser", 0)
+    verify_code = post.get("vc")
 
     db_objects = UserInfo.objects.filter(uname=input_uname)
 
+    if verify_code.upper() != request.session.get('verifycode'):
+        context = {'user':input_uname}
+        return render(request, 'df_user/login.html', context)
 #        response = rende_to_response("df_user/user_center_info.html")
 #        response.set_cookie('user', 'input_uname')
 #        return response
@@ -135,6 +139,26 @@ def user_info_handle(request):
 #        response.set_cookie('user', "", max_age=-1)
  #   return response
 
+def login_handle(request):
+    post = request.POST
+    input_uname = post.get("username")
+    is_remember = post.get("isRemeberUser", 0)
+
+    db_objects = UserInfo.objects.filter(uname=input_uname)
+    response = HttpResponseRedirect('/user/info/')
+
+    if len(db_objects) == 0:
+        return redirect('/user/login/')
+    if is_remember == 'checkbox':
+        response.set_cookie('user', input_uname)
+    else:
+        response.set_cookie('user', '', max_age=-1)
+
+    request.session['user_id'] = db_objects[0].id
+    request.session['user_name'] = db_objects[0].uname
+
+    return response
+
 
 def user_center_info(request):
     user_name = request.session.get('user_name')
@@ -166,3 +190,38 @@ def user_site(request):
 
     content = {"user":user}
     return render(request, 'df_user/user_center_site.html', content)
+
+def verify(request):
+    vc = request.POST.get('vc')
+    if vc == None:
+        return JsonResponse({'vc': vc})
+#    if vc.upper() == request.session['verifycode']:
+#        return redirect('/user/user_info_handle/')
+ #   else:
+ #       return render(request, 'df_user/login.html')
+
+def verify_user(request):
+    uname = request.GET.get('uname')
+    count = UserInfo.objects.filter(uname = uname).count()
+    return JsonResponse({'count': count})
+
+def verify_pwd(request):
+    input_name = request.GET.get('uname')
+    pwd = request.GET.get('pwd')
+
+    # db = UserInfo.objects.filter(uname='chenyi')
+    # s1 = sha1()
+    # s1.update(pwd.encode('utf-8'))
+    # upwd = s1.hexdigest()
+    if input_name == None:
+         return JsonResponse({'result':0})
+
+    db_objects = UserInfo.objects.filter(uname=input_name)
+    s1 = sha1()
+    s1.update(pwd.encode('utf-8'))
+    upwd = s1.hexdigest()
+    if upwd == db_objects[0].upwd:
+        result = 1
+    else:
+        result = 0
+    return JsonResponse({'result': result})
